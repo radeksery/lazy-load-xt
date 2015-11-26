@@ -4,31 +4,32 @@
  * Licensed under MIT */
 
 (function ($, window, document, undefined) {
-    // options
-    var lazyLoadXT = 'lazyLoadXT',
-        dataLazied = 'lazied',
-        load_error = 'load error',
-        classLazyHidden = 'lazy-hidden',
-        docElement = document.documentElement || document.body,
-    //  force load all images in Opera Mini and some mobile browsers without scroll event or getBoundingClientRect()
-        forceLoad = (window.onscroll === undefined || !!window.operamini || !docElement.getBoundingClientRect),
-        options = {
-            autoInit: true, // auto initialize in $.ready
-            selector: 'img[data-src]', // selector for lazyloading elements
-            blankImage: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-            throttle: 99, // interval (ms) for changes check
-            forceLoad: forceLoad, // force auto load all images
+	// options
+	var lazyLoadXT = 'lazyLoadXT',
+		dataLazied = 'lazied',
+		load_error = 'load error',
+		classLazyHidden = 'lazy-hidden',
+		classLazyPreloaded = 'lazy-preloaded',
+		docElement = document.documentElement || document.body,
+	//  force load all images in Opera Mini and some mobile browsers without scroll event or getBoundingClientRect()
+		forceLoad = (window.onscroll === undefined || !!window.operamini || !docElement.getBoundingClientRect),
+		options = {
+			autoInit: true, // auto initialize in $.ready
+			selector: 'img[data-src]', // selector for lazyloading elements
+			blankImage: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+			throttle: 99, // interval (ms) for changes check
+			forceLoad: forceLoad, // force auto load all images
 
             loadEvent: 'pageshow', // check AJAX-loaded content in jQueryMobile
             updateEvent: 'load orientationchange resize scroll touchmove focus', // page-modified events
             forceEvent: 'lazyloadall', // force loading of all elements
 
-            //onstart: null,
-            oninit: {removeClass: 'lazy'}, // init handler
-            onshow: {addClass: classLazyHidden}, // start loading handler
-            onload: {removeClass: classLazyHidden, addClass: 'lazy-loaded'}, // load success handler
-            onerror: {removeClass: classLazyHidden}, // error handler
-            //oncomplete: null, // complete handler
+			//onstart: null,
+			oninit: {removeClass: 'lazy'}, // init handler
+			onshow: {addClass: classLazyHidden}, // start loading handler
+			onload: {removeClass: classLazyHidden + ' ' + classLazyPreloaded, addClass: 'lazy-loaded'}, // load success handler
+			onerror: {removeClass: classLazyHidden + ' ' + classLazyPreloaded}, // error handler
+			//oncomplete: null, // complete handler
 
             //scrollContainer: undefined,
             checkDuplicates: true
@@ -54,34 +55,34 @@
      */
         waitingMode = 0;
 
-    $[lazyLoadXT] = $extend(options, elementOptions, $[lazyLoadXT]);
+	$[lazyLoadXT] = $extend(options, elementOptions, $[lazyLoadXT]);
 
-    /**
-     * Return options.prop if obj.prop is undefined, otherwise return obj.prop
-     * @param {*} obj
-     * @param {*} prop
-     * @returns *
-     */
-    function getOrDef(obj, prop) {
-        return obj[prop] === undefined ? options[prop] : obj[prop];
-    }
+	/**
+	 * Return options.prop if obj.prop is undefined, otherwise return obj.prop
+	 * @param {*} obj
+	 * @param {*} prop
+	 * @returns *
+	 */
+	function getOrDef(obj, prop) {
+		return obj[prop] === undefined ? options[prop] : obj[prop];
+	}
 
-    /**
-     * @returns {number}
-     */
-    function scrollTop() {
-        var scroll = window.pageYOffset;
-        return (scroll === undefined) ? docElement.scrollTop : scroll;
-    }
+	/**
+	 * @returns {number}
+	 */
+	function scrollTop() {
+		var scroll = window.pageYOffset;
+		return (scroll === undefined) ? docElement.scrollTop : scroll;
+	}
 
-    /**
-     * Add new elements to lazy-load list:
-     * $(elements).lazyLoadXT() or $(window).lazyLoadXT()
-     *
-     * @param {object} [overrides] override global options
-     */
-    $.fn[lazyLoadXT] = function (overrides) {
-        overrides = overrides || {};
+	/**
+	 * Add new elements to lazy-load list:
+	 * $(elements).lazyLoadXT() or $(window).lazyLoadXT()
+	 *
+	 * @param {object} [overrides] override global options
+	 */
+	$.fn[lazyLoadXT] = function (overrides) {
+		overrides = overrides || {};
 
         var blankImage = getOrDef(overrides, 'blankImage'),
             checkDuplicates = getOrDef(overrides, 'checkDuplicates'),
@@ -90,12 +91,12 @@
             elementOptionsOverrides = {},
             prop;
 
-        // empty overrides.scrollContainer is supported by both jQuery and Zepto
-        $(scrollContainer).on('scroll', queueCheckLazyElements);
+		// empty overrides.scrollContainer is supported by both jQuery and Zepto
+		$(scrollContainer).on('scroll', queueCheckLazyElements);
 
-        for (prop in elementOptions) {
-            elementOptionsOverrides[prop] = getOrDef(overrides, prop);
-        }
+		for (prop in elementOptions) {
+			elementOptionsOverrides[prop] = getOrDef(overrides, prop);
+		}
 
         return this.each(function (index, el) {
             if (el === window) {
@@ -114,10 +115,10 @@
                     el.src = blankImage;
                 }
 
-                // clone elementOptionsOverrides object
-                $el[lazyLoadXT] = $extend({}, elementOptionsOverrides);
+				// clone elementOptionsOverrides object
+				$el[lazyLoadXT] = $extend({}, elementOptionsOverrides);
 
-                triggerEvent('init', $el);
+				triggerEvent('init', $el);
 
                 elements.push($el);
                 queueCheckLazyElements();
@@ -126,60 +127,71 @@
     };
 
 
-    /**
-     * Process function/object event handler
-     * @param {string} event suffix
-     * @param {jQuery} $el
-     */
-    function triggerEvent(event, $el) {
-        var handler = options['on' + event];
-        if (handler) {
-            if ($isFunction(handler)) {
-                handler.call($el[0]);
-            } else {
-                if (handler.addClass) {
-                    $el.addClass(handler.addClass);
-                }
-                if (handler.removeClass) {
-                    $el.removeClass(handler.removeClass);
-                }
-            }
-        }
+	/**
+	 * Process function/object event handler
+	 * @param {string} event suffix
+	 * @param {jQuery} $el
+	 */
+	function triggerEvent(event, $el) {
+		var handler = options['on' + event];
+		if (handler) {
+			if ($isFunction(handler)) {
+				handler.call($el[0]);
+			} else {
+				if (handler.addClass) {
+					$el.addClass(handler.addClass);
+				}
+				if (handler.removeClass) {
+					$el.removeClass(handler.removeClass);
+				}
+			}
+		}
 
-        $el.trigger('lazy' + event, [$el]);
+		$el.trigger('lazy' + event, [$el]);
 
-        // queue next check as images may be resized after loading of actual file
-        queueCheckLazyElements();
-    }
-
-
-    /**
-     * Trigger onload/onerror handler
-     * @param {Event} e
-     */
-    function triggerLoadOrError(e) {
-        triggerEvent(e.type, $(this).off(load_error, triggerLoadOrError));
-    }
+		// queue next check as images may be resized after loading of actual file
+		queueCheckLazyElements();
+	}
 
 
-    /**
-     * Load visible elements
-     * @param {bool} [force] loading of all elements
-     */
-    function checkLazyElements(force) {
-        if (!elements.length) {
-            return;
-        }
+	/**
+	 * Trigger onload/onerror handler
+	 * @param {Event} e
+	 */
+	function triggerLoadOrError(e) {
+		triggerEvent(e.type, $(this).off(load_error, triggerLoadOrError));
+	}
 
-        force = force || options.forceLoad;
 
-        topLazy = Infinity;
+	/**
+	 * Trigger onload/onerror handler on image
+	 * @param {Event} e
+	 */
+	function triggerLoadOrErrorImg(e) {
+		e.data.$el.addClass(classLazyPreloaded);
+		e.data.el.src = e.data.src;
+		$.proxy(triggerLoadOrError, e.data.$el, e)();
+	}
 
-        var viewportTop = scrollTop(),
-            viewportHeight = window.innerHeight || docElement.clientHeight,
-            viewportWidth = window.innerWidth || docElement.clientWidth,
-            i,
-            length;
+
+	/**
+	 * Load visible elements
+	 * @param {bool} [force] loading of all elements
+	 */
+	function checkLazyElements(force) {
+		if (!elements.length) {
+			return;
+		}
+
+		force = force || options.forceLoad;
+
+		topLazy = Infinity;
+
+		var viewportTop = scrollTop(),
+			viewportHeight = window.innerHeight || docElement.clientHeight,
+			viewportWidth = window.innerWidth || docElement.clientWidth,
+			i,
+			length;
 
         for (i = 0, length = elements.length; i < length; i++) {
             var $el = elements[i],
@@ -194,36 +206,40 @@
                 removeNode = true;
             } else if (force || !objData.visibleOnly || el.offsetWidth || el.offsetHeight) {
 
-                if (!visible) {
-                    var elPos = el.getBoundingClientRect(),
-                        edgeX = objData.edgeX,
-                        edgeY = objData.edgeY;
+				if (!visible) {
+					var elPos = el.getBoundingClientRect(),
+						edgeX = objData.edgeX,
+						edgeY = objData.edgeY;
 
-                    topEdge = (elPos.top + viewportTop - edgeY) - viewportHeight;
+					topEdge = (elPos.top + viewportTop - edgeY) - viewportHeight;
 
-                    visible = (topEdge <= viewportTop && elPos.bottom > -edgeY &&
-                        elPos.left <= viewportWidth + edgeX && elPos.right > -edgeX);
-                }
+					visible = (topEdge <= viewportTop && elPos.bottom > -edgeY &&
+						elPos.left <= viewportWidth + edgeX && elPos.right > -edgeX);
+				}
 
-                if (visible) {
-                    $el.on(load_error, triggerLoadOrError);
+				if (visible) {
+					triggerEvent('show', $el);
 
-                    triggerEvent('show', $el);
+					var srcAttr = objData.srcAttr,
+						src = $isFunction(srcAttr) ? srcAttr($el) : el.getAttribute(srcAttr);
+					if (src) {
+						if (el.tagName === 'IMG') {
+							$('<img />')
+								.on(load_error, {$el: $el, el: el, src: src}, triggerLoadOrErrorImg)
+								.attr('src', src);
+						} else {
+							$el.on(load_error, triggerLoadOrError);
+							el.src = src;
+						}
+					}
 
-                    var srcAttr = objData.srcAttr,
-                        src = $isFunction(srcAttr) ? srcAttr($el) : el.getAttribute(srcAttr);
-
-                    if (src) {
-                        el.src = src;
-                    }
-
-                    removeNode = true;
-                } else {
-                    if (topEdge < topLazy) {
-                        topLazy = topEdge;
-                    }
-                }
-            }
+					removeNode = true;
+				} else {
+					if (topEdge < topLazy) {
+						topLazy = topEdge;
+					}
+				}
+			}
 
             if (removeNode) {
                 $data(el, dataLazied, 0);
@@ -232,76 +248,76 @@
             }
         }
 
-        if (!length) {
-            triggerEvent('complete', $(docElement));
-        }
-    }
+		if (!length) {
+			triggerEvent('complete', $(docElement));
+		}
+	}
 
 
-    /**
-     * Run check of lazy elements after timeout
-     */
-    function timeoutLazyElements() {
-        if (waitingMode > 1) {
-            waitingMode = 1;
-            checkLazyElements();
-            setTimeout(timeoutLazyElements, options.throttle);
-        } else {
-            waitingMode = 0;
-        }
-    }
+	/**
+	 * Run check of lazy elements after timeout
+	 */
+	function timeoutLazyElements() {
+		if (waitingMode > 1) {
+			waitingMode = 1;
+			checkLazyElements();
+			setTimeout(timeoutLazyElements, options.throttle);
+		} else {
+			waitingMode = 0;
+		}
+	}
 
 
-    /**
-     * Queue check of lazy elements because of event e
-     * @param {Event} [e]
-     */
-    function queueCheckLazyElements(e) {
-        if (!elements.length) {
-            return;
-        }
+	/**
+	 * Queue check of lazy elements because of event e
+	 * @param {Event} [e]
+	 */
+	function queueCheckLazyElements(e) {
+		if (!elements.length) {
+			return;
+		}
 
-        // fast check for scroll event without new visible elements
-        if (e && e.type === 'scroll' && e.currentTarget === window) {
-            if (topLazy >= scrollTop()) {
-                return;
-            }
-        }
+		// fast check for scroll event without new visible elements
+		if (e && e.type === 'scroll' && e.currentTarget === window) {
+			if (topLazy >= scrollTop()) {
+				return;
+			}
+		}
 
-        if (!waitingMode) {
-            setTimeout(timeoutLazyElements, 0);
-        }
-        waitingMode = 2;
-    }
-
-
-    /**
-     * Initialize list of hidden elements
-     */
-    function initLazyElements() {
-        $window.lazyLoadXT();
-    }
+		if (!waitingMode) {
+			setTimeout(timeoutLazyElements, 0);
+		}
+		waitingMode = 2;
+	}
 
 
-    /**
-     * Loading of all elements
-     */
-    function forceLoadAll() {
-        checkLazyElements(true);
-    }
+	/**
+	 * Initialize list of hidden elements
+	 */
+	function initLazyElements() {
+		$window.lazyLoadXT();
+	}
 
 
-    /**
-     * Initialization
-     */
-    $(document).ready(function () {
-        triggerEvent('start', $window);
+	/**
+	 * Loading of all elements
+	 */
+	function forceLoadAll() {
+		checkLazyElements(true);
+	}
+
+
+	/**
+	 * Initialization
+	 */
+	$(document).ready(function () {
+		triggerEvent('start', $window);
 
         $window
             .on(options.updateEvent, queueCheckLazyElements)
             .on(options.forceEvent, forceLoadAll);
 
-        $(document).on(options.updateEvent, queueCheckLazyElements);
+		$(document).on(options.updateEvent, queueCheckLazyElements);
 
         if (options.autoInit) {
             $window.on(options.loadEvent, initLazyElements);

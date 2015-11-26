@@ -99,6 +99,7 @@
 
         return src;
     }
+    $.lazyLoadXT.parseSrcset = parseSrcset;
 
     $(document).on('lazyshow', 'img', function (e, $el) {
         var srcset = $el.attr(options.srcsetAttr);

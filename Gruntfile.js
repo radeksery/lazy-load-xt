@@ -66,6 +66,10 @@ module.exports = function (grunt) {
                 src: ['src/jquery.<%= pkg.name %>.bg.js'],
                 dest: 'dist/jquery.<%= pkg.name %>.bg.js'
             },
+            bgSrcset: {
+                src: ['src/jquery.<%= pkg.name %>.bg-srcset.js'],
+                dest: 'dist/jquery.<%= pkg.name %>.bg-srcset.js'
+            },
             bootstrap: {
                 src: ['src/jquery.<%= pkg.name %>.bootstrap.js'],
                 dest: 'dist/jquery.<%= pkg.name %>.bootstrap.js'
@@ -125,6 +129,10 @@ module.exports = function (grunt) {
             bg: {
                 src: '<%= concat.bg.dest %>',
                 dest: 'dist/jquery.<%= pkg.name %>.bg.min.js'
+            },
+            bgSrcset: {
+                src: '<%= concat.bgSrcset.dest %>',
+                dest: 'dist/jquery.<%= pkg.name %>.bg-srcset.min.js'
             },
             bootstrap: {
                 src: '<%= concat.bootstrap.dest %>',
