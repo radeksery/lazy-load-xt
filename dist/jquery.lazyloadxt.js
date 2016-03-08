@@ -1,4 +1,4 @@
-/*! Lazy Load XT v1.1.0 2016-01-12
+/*! Lazy Load XT v1.1.0 2016-03-08
  * http://ressio.github.io/lazy-load-xt
  * (C) 2016 RESS.io
  * Licensed under MIT */
@@ -31,29 +31,29 @@
 			onerror: {removeClass: classLazyHidden + ' ' + classLazyPreloaded}, // error handler
 			//oncomplete: null, // complete handler
 
-            //scrollContainer: undefined,
-            checkDuplicates: true
-        },
-        elementOptions = {
-            srcAttr: 'data-src',
-            edgeX: 0,
-            edgeY: 0,
-            visibleOnly: true
-        },
-        $window = $(window),
-        $isFunction = $.isFunction,
-        $extend = $.extend,
-        $data = $.data || function (el, name) {
-            return $(el).data(name);
-        },
-        elements = [],
-        topLazy = 0,
-    /*
-     waitingMode=0 : no setTimeout
-     waitingMode=1 : setTimeout, no deferred events
-     waitingMode=2 : setTimeout, deferred events
-     */
-        waitingMode = 0;
+			//scrollContainer: undefined,
+			checkDuplicates: true
+		},
+		elementOptions = {
+			srcAttr: 'data-src',
+			edgeX: 0,
+			edgeY: 0,
+			visibleOnly: true
+		},
+		$window = $(window),
+		$isFunction = $.isFunction,
+		$extend = $.extend,
+		$data = $.data || function (el, name) {
+			return $(el).data(name);
+		},
+		elements = [],
+		topLazy = 0,
+	/*
+	 waitingMode=0 : no setTimeout
+	 waitingMode=1 : setTimeout, no deferred events
+	 waitingMode=2 : setTimeout, deferred events
+	 */
+		waitingMode = 0;
 
 	$[lazyLoadXT] = $extend(options, elementOptions, $[lazyLoadXT]);
 
@@ -84,12 +84,12 @@
 	$.fn[lazyLoadXT] = function (overrides) {
 		overrides = overrides || {};
 
-        var blankImage = getOrDef(overrides, 'blankImage'),
-            checkDuplicates = getOrDef(overrides, 'checkDuplicates'),
-            scrollContainer = getOrDef(overrides, 'scrollContainer'),
-            forceShow = getOrDef(overrides, 'show'),
-            elementOptionsOverrides = {},
-            prop;
+		var blankImage = getOrDef(overrides, 'blankImage'),
+			checkDuplicates = getOrDef(overrides, 'checkDuplicates'),
+			scrollContainer = getOrDef(overrides, 'scrollContainer'),
+			forceShow = getOrDef(overrides, 'show'),
+			elementOptionsOverrides = {},
+			prop;
 
 		// empty overrides.scrollContainer is supported by both jQuery and Zepto
 		$(scrollContainer).on('scroll', queueCheckLazyElements);
@@ -98,33 +98,33 @@
 			elementOptionsOverrides[prop] = getOrDef(overrides, prop);
 		}
 
-        return this.each(function (index, el) {
-            if (el === window) {
-                $(options.selector).lazyLoadXT(overrides);
-            } else {
-                var duplicate = checkDuplicates && $data(el, dataLazied),
-                    $el = $(el).data(dataLazied, forceShow ? -1 : 1);
+		return this.each(function (index, el) {
+			if (el === window) {
+				$(options.selector).lazyLoadXT(overrides);
+			} else {
+				var duplicate = checkDuplicates && $data(el, dataLazied),
+					$el = $(el).data(dataLazied, forceShow ? -1 : 1);
 
-                // prevent duplicates
-                if (duplicate) {
-                    queueCheckLazyElements();
-                    return;
-                }
+				// prevent duplicates
+				if (duplicate) {
+					queueCheckLazyElements();
+					return;
+				}
 
-                if (blankImage && el.tagName === 'IMG' && !el.src) {
-                    el.src = blankImage;
-                }
+				if (blankImage && el.tagName === 'IMG' && !el.src) {
+					el.src = blankImage;
+				}
 
 				// clone elementOptionsOverrides object
 				$el[lazyLoadXT] = $extend({}, elementOptionsOverrides);
 
 				triggerEvent('init', $el);
 
-                elements.push($el);
-                queueCheckLazyElements();
-            }
-        });
-    };
+				elements.push($el);
+				queueCheckLazyElements();
+			}
+		});
+	};
 
 
 	/**
@@ -170,6 +170,7 @@
 	function triggerLoadOrErrorImg(e) {
 		e.data.$el.addClass(classLazyPreloaded);
 		e.data.el.src = e.data.src;
+		setTimeout(function() {}, 0); // force browser to redraw after class and src changed
 		$.proxy(triggerLoadOrError, e.data.$el, e)();
 	}
 
@@ -193,18 +194,18 @@
 			i,
 			length;
 
-        for (i = 0, length = elements.length; i < length; i++) {
-            var $el = elements[i],
-                el = $el[0],
-                objData = $el[lazyLoadXT],
-                removeNode = false,
-                visible = force || $data(el, dataLazied) < 0,
-                topEdge;
+		for (i = 0, length = elements.length; i < length; i++) {
+			var $el = elements[i],
+				el = $el[0],
+				objData = $el[lazyLoadXT],
+				removeNode = false,
+				visible = force || $data(el, dataLazied) < 0,
+				topEdge;
 
-            // remove items that are not in DOM
-            if (!$.contains(docElement, el)) {
-                removeNode = true;
-            } else if (force || !objData.visibleOnly || el.offsetWidth || el.offsetHeight) {
+			// remove items that are not in DOM
+			if (!$.contains(docElement, el)) {
+				removeNode = true;
+			} else if (force || !objData.visibleOnly || el.offsetWidth || el.offsetHeight) {
 
 				if (!visible) {
 					var elPos = el.getBoundingClientRect(),

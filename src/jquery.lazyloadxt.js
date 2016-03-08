@@ -171,6 +171,7 @@
 	function triggerLoadOrErrorImg(e) {
 		e.data.$el.addClass(classLazyPreloaded);
 		e.data.el.src = e.data.src;
+		setTimeout(function() {}, 0); // force browser to redraw after class and src changed
 		$.proxy(triggerLoadOrError, e.data.$el, e)();
 	}
 
