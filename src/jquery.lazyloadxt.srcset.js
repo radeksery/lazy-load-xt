@@ -115,7 +115,20 @@
                         return ($el.attr(options.srcsetBaseAttr) || '') + item.substr(0, i) + ($el.attr(options.srcsetExtAttr) || '') + item.substr(i);
                     }).join(', ');
                 }
-                $el.attr('srcset', srcset);
+                $('<img />')
+                    .on('load', function() {
+                        $el
+                            .addClass('lazy-preloaded')
+                            .attr('srcset', srcset);
+
+                        if (options.onload.addClass) {
+                            $el.addClass(options.onload.addClass);
+                        }
+                        if (options.onload.removeClass) {
+                            $el.removeClass(options.onload.removeClass);
+                        }
+                    })
+                    .attr('srcset', srcset);
             } else {
                 $el.lazyLoadXT.srcAttr = parseSrcset;
             }
