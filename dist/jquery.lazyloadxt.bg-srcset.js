@@ -1,13 +1,39 @@
-/*! Lazy Load XT v1.1.0 2016-03-08
+/*! Lazy Load XT v1.1.0 2016-08-17
  * http://ressio.github.io/lazy-load-xt
  * (C) 2016 RESS.io
  * Licensed under MIT */
 
 (function ($) {
     var options = $.lazyLoadXT,
+        $isFunction = $.isFunction,
         bgAttr = options.bgAttr || 'data-bg';
 
     options.selector += ',[' + bgAttr + '], .lazy-bg';
+
+
+    /**
+     * Process function/object event handler
+     * @param {string} event suffix
+     * @param {jQuery} $el
+     */
+    function triggerEvent(event, $el) {
+        var handler = options['on' + event];
+        if (handler) {
+            if ($isFunction(handler)) {
+                handler.call($el[0]);
+            } else {
+                if (handler.addClass) {
+                    $el.addClass(handler.addClass);
+                }
+                if (handler.removeClass) {
+                    $el.removeClass(handler.removeClass);
+                }
+            }
+        }
+
+        $el.trigger('lazy' + event, [$el]);
+    }
+
 
     $(document).on('lazyshow', function (e) {
         var $el = $(e.target);
@@ -28,13 +54,9 @@
                         $el
                             .addClass('lazy-preloaded')
                             .css('background-image', "url('" + src + "')");
-
-                        if (options.onload.addClass) {
-                            $el.addClass(options.onload.addClass);
-                        }
-                        if (options.onload.removeClass) {
-                            $el.removeClass(options.onload.removeClass);
-                        }
+                    })
+                    .on('load error', function(e) {
+                        triggerEvent(e.type, $el);
                     })
                     .attr('src', src);
             }
