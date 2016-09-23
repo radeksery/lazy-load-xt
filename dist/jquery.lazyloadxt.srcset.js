@@ -1,4 +1,4 @@
-/*! Lazy Load XT v1.1.0 2016-08-17
+/*! Lazy Load XT v1.1.0 2016-09-23
  * http://ressio.github.io/lazy-load-xt
  * (C) 2016 RESS.io
  * Licensed under MIT */
@@ -15,6 +15,7 @@
         infty = [0, Infinity],
         one = [0, 1],
         srcsetOptions = {
+            preferNativeSrcset: true,
             srcsetAttr: 'data-srcset',
             srcsetExtended: true,
             srcsetBaseAttr: 'data-srcset-base',
@@ -105,7 +106,7 @@
         var srcset = $el.attr(options.srcsetAttr);
 
         if (srcset) {
-            if (srcsetSupport) {
+            if (options.preferNativeSrcset && srcsetSupport) {
                 if (options.srcsetExtended) {
                     srcset = $.map(splitSrcset(srcset), function (item) {
                         var i = item.indexOf(' ');
