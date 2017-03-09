@@ -1,6 +1,6 @@
-/*! Lazy Load XT v1.1.0 2016-01-28
+/*! Lazy Load XT v1.1.0 2017-03-09
  * http://ressio.github.io/lazy-load-xt
- * (C) 2016 RESS.io
+ * (C) 2017 RESS.io
  * Licensed under MIT */
 
 (function (window, document, Element, undefined) {
@@ -173,7 +173,7 @@
             return this.each(function () {
                 var evt;
                 if (window.CustomEvent) {
-                    evt = new CustomEvent(type, {detail: data});
+                    evt = new CustomEvent(type, {bubbles: true, cancelable: true, detail: data});
                 } else {
                     evt = document.createEvent('CustomEvent');
                     evt.initCustomEvent(type, true, true, data);
@@ -231,7 +231,7 @@
         var node = event.target;
         while (node && node !== this) {
             if (matches.call(node, selector)) {
-                return handler.call(node, event);
+                return handler.apply(node, [].concat(event, event.detail));
             }
             node = node.parentElement;
         }
