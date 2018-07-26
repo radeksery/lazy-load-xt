@@ -42,11 +42,19 @@
     }
 
     function compareMax(item) {
-        return item[property] >= viewport[property] || item[property] === limit;
+        if (property === 'w') {
+            return (item.w * item.x) >= (viewport.w * viewport.x) || item[property] === limit;
+        } else {
+            return item[property] >= viewport[property] || item[property] === limit;
+        }
     }
 
     function compareMin(item) {
-        return item[property] === limit;
+		if (property === 'w') {
+			return (item.w * item.x) === (viewport.w * viewport.x) || item[property] === limit;
+		} else {
+			return item[property] === limit;
+		}
     }
 
     function splitSrcset(srcset) {
@@ -73,7 +81,7 @@
         }
 
         viewport = {
-            w: window.innerWidth || documentElement.clientWidth,
+            w: (window.innerWidth || documentElement.clientWidth),
             x: window.devicePixelRatio || 1
         };
 

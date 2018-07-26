@@ -1,9 +1,13 @@
-/*! Lazy Load XT v1.1.0 2016-09-23
+/*! Lazy Load XT v1.1.0 2018-07-27
  * http://ressio.github.io/lazy-load-xt
- * (C) 2016 RESS.io
+ * (C) 2018 RESS.io
  * Licensed under MIT */
+/*jslint browser:true, plusplus:true, vars:true, regexp:false */
+/*jshint browser:true, jquery:true */
 
 (function ($, window, document, undefined) {
+
+
     var options = $.lazyLoadXT,
         documentElement = document.documentElement,
         srcsetSupport = (function () {
@@ -42,11 +46,19 @@
     }
 
     function compareMax(item) {
-        return item[property] >= viewport[property] || item[property] === limit;
+        if (property === 'w') {
+            return (item.w * item.x) >= (viewport.w * viewport.x) || item[property] === limit;
+        } else {
+            return item[property] >= viewport[property] || item[property] === limit;
+        }
     }
 
     function compareMin(item) {
-        return item[property] === limit;
+		if (property === 'w') {
+			return (item.w * item.x) === (viewport.w * viewport.x) || item[property] === limit;
+		} else {
+			return item[property] === limit;
+		}
     }
 
     function splitSrcset(srcset) {
@@ -73,7 +85,7 @@
         }
 
         viewport = {
-            w: window.innerWidth || documentElement.clientWidth,
+            w: (window.innerWidth || documentElement.clientWidth),
             x: window.devicePixelRatio || 1
         };
 
